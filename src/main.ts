@@ -23,42 +23,57 @@ const snake = {
 }
 
 function moveSquare() {
-  if (snake.x > canvasWidth) {
-    snake.x = -squareWidth
-  } else if (snake.x < -squareWidth) {
-    snake.x = canvasWidth
-  } else if (snake.y > canvasHeight) {
-    snake.y = -squareWidth
-  } else if (snake.y < -squareWidth) {
-    snake.y = canvasHeight
-  }
 
   context.clearRect(0, 0, canvasWidth, canvasHeight)
   context.fillRect(snake.x, snake.y, squareWidth, squareWidth)
+  handleSnakePosition()
 
-  handleSnakePosition(snake.direction)
 
-  // snake.y += speed
-  console.log(snake.y)
   requestAnimationFrame(moveSquare)
 }
 
-function handleSnakePosition(snakeDirection: DIRECTION) {
-  let nextPosition = null
-
-  switch (snakeDirection) {
+function handleSnakePosition() {
+  switch (snake.direction) {
     case DIRECTION.TOP:
-      snake.y -= snake.speed
+      handleTopPosition()
       break;
     case DIRECTION.BOTTOM:
-      snake.y += snake.speed
+      handleBottomPosition()
       break
     case DIRECTION.LEFT:
-      snake.x -= snake.speed
+      handleLeftPosition()
       break
     case DIRECTION.RIGHT:
-      snake.x += snake.speed
+      handleRightPosition()
   }
+}
+
+function handleTopPosition() {
+  const nextPosition = snake.y - snake.speed
+  const hasReachedTopEnd = nextPosition < -squareWidth
+
+  snake.y = hasReachedTopEnd ? canvasHeight : nextPosition
+}
+
+function handleBottomPosition() {
+  const nextPosition = snake.y + snake.speed
+  const hasReachedBottomEnd = nextPosition > canvasHeight
+
+  snake.y = hasReachedBottomEnd ? -squareWidth : nextPosition
+}
+
+function handleLeftPosition() {
+  const nextPosition = snake.x - snake.speed
+  const hasReachedLeftEnd = nextPosition < -squareWidth
+
+  snake.x = hasReachedLeftEnd ? canvasWidth : nextPosition
+}
+
+function handleRightPosition() {
+  const nextPosition = snake.x + snake.speed
+  const hasReachedRightEnd = nextPosition > canvasWidth
+
+  snake.x = hasReachedRightEnd ? -squareWidth : nextPosition
 }
 
 
