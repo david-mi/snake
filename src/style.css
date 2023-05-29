@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+canvas {
+  border: solid 1px black;
+}
