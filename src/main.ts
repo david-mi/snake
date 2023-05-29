@@ -1,81 +1,47 @@
 import './style.css'
 import { DIRECTION } from "./types"
+import { Snake } from "./Snake"
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement
-const canvasHeight = 500
-const canvasWidth = 500
-canvas.width = canvasHeight
-canvas.height = canvasWidth
-const canvasVerticalCenter = canvasHeight / 2
-const canvasHorizontalCenter = canvasWidth / 2
+const horizontalPosition = 0
+const snakeSpeed = 1
 const squareWidth = 50
-const rightLimit = canvasWidth - squareWidth
 
-const context = canvas.getContext("2d")!
+const snake = new Snake(
+  horizontalPosition,
+  DIRECTION.RIGHT,
+  snakeSpeed,
+  squareWidth
+)
 
-context.fillRect(0, canvasVerticalCenter, squareWidth, squareWidth)
+document.addEventListener("keydown", handleKeyDown)
 
-const snake = {
-  x: 0,
-  y: canvasVerticalCenter,
-  direction: DIRECTION.RIGHT,
-  speed: 1
-}
-
-function moveSquare() {
-
-  context.clearRect(0, 0, canvasWidth, canvasHeight)
-  context.fillRect(snake.x, snake.y, squareWidth, squareWidth)
-  handleSnakePosition()
-
-
-  requestAnimationFrame(moveSquare)
-}
-
-function handleSnakePosition() {
-  switch (snake.direction) {
-    case DIRECTION.TOP:
-      handleTopPosition()
+function handleKeyDown({ key }: KeyboardEvent) {
+  switch (key) {
+    case "ArrowRight": {
+      if (snake.direction !== DIRECTION.LEFT) {
+        snake.direction = DIRECTION.RIGHT
+      }
+      break
+    }
+    case "ArrowLeft": {
+      if (snake.direction !== DIRECTION.RIGHT) {
+        snake.direction = DIRECTION.LEFT
+      }
+      break
+    }
+    case "ArrowUp": {
+      if (snake.direction !== DIRECTION.BOTTOM) {
+        snake.direction = DIRECTION.TOP
+      }
       break;
-    case DIRECTION.BOTTOM:
-      handleBottomPosition()
-      break
-    case DIRECTION.LEFT:
-      handleLeftPosition()
-      break
-    case DIRECTION.RIGHT:
-      handleRightPosition()
+    }
+    case "ArrowDown": {
+      if (snake.direction !== DIRECTION.TOP) {
+        snake.direction = DIRECTION.BOTTOM
+      }
+      break;
+    }
   }
 }
 
-function handleTopPosition() {
-  const nextPosition = snake.y - snake.speed
-  const hasReachedTopEnd = nextPosition < -squareWidth
-
-  snake.y = hasReachedTopEnd ? canvasHeight : nextPosition
-}
-
-function handleBottomPosition() {
-  const nextPosition = snake.y + snake.speed
-  const hasReachedBottomEnd = nextPosition > canvasHeight
-
-  snake.y = hasReachedBottomEnd ? -squareWidth : nextPosition
-}
-
-function handleLeftPosition() {
-  const nextPosition = snake.x - snake.speed
-  const hasReachedLeftEnd = nextPosition < -squareWidth
-
-  snake.x = hasReachedLeftEnd ? canvasWidth : nextPosition
-}
-
-function handleRightPosition() {
-  const nextPosition = snake.x + snake.speed
-  const hasReachedRightEnd = nextPosition > canvasWidth
-
-  snake.x = hasReachedRightEnd ? -squareWidth : nextPosition
-}
-
-
-moveSquare()
-context.fillRect(rightLimit, snake.y, squareWidth, squareWidth)
+snake.move()
