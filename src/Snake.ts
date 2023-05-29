@@ -6,6 +6,12 @@ export class Snake {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
   y: number
+  start: number | null = null
+  snakePositions: { x: number, y: number }[] = []
+  snakeArr: { x: number, y: number, snakeOnIt: boolean }[][] = []
+  headIndex = { x: 0, y: 5 }
+  rowCells: number
+  columnCells: number
 
   constructor(
     public x: number,
@@ -17,61 +23,111 @@ export class Snake {
     this.canvas = canvas
     this.context = context
     this.y = verticalCenter
+    this.snakePositions.push({ x: this.x, y: this.y })
+    this.rowCells = this.canvas.width / this.squareWidth
+    this.columnCells = this.canvas.height / this.squareWidth
+    this.makeSnakeArr()
+  }
+
+  public makeSnakeArr() {
+    let index = 0
+
+    for (let y = 0; y < this.rowCells; y++) {
+      let rowArr = []
+
+      for (let x = 0; x < this.columnCells; x++) {
+        const isOnStartingLine = x === 0 && y === 5
+
+        const snakeData = {
+          x: x * this.squareWidth,
+          y: y * this.squareWidth,
+          snakeOnIt: isOnStartingLine
+        }
+
+        rowArr.push(snakeData)
+        index++
+      }
+
+      this.snakeArr.push(rowArr)
+    }
+
+    console.log(this.snakeArr)
+    console.log(this.headIndex)
   }
 
   public move() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.context.fillRect(this.x, this.y, this.squareWidth, this.squareWidth)
-    this.handlePosition(this.canvas.height, this.canvas.width)
+    if (this.start === null) {
+      this.start = Date.now()
+    }
+
+    if (Date.now() - this.start > 1000 / this.speed) {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+      for (const row of this.snakeArr) {
+        for (const { snakeOnIt, x, y } of row) {
+          if (snakeOnIt) {
+            this.context.fillRect(x, y, this.squareWidth, this.squareWidth)
+          }
+        }
+      }
+
+      this.snakeArr[this.headIndex.y][this.headIndex.x].snakeOnIt = false
+      this.handlePosition()
+      this.snakeArr[this.headIndex.y][this.headIndex.x].snakeOnIt = true
+      this.start = Date.now()
+    }
 
     requestAnimationFrame(this.move.bind(this))
+  }
+
+  public test() {
+    this.snakePositions.push({ x: this.x, y: this.y })
+    this.snakePositions.forEach(({ x, y }, i) => {
+      console.log({ index: i, x, y })
+    })
   }
 
   public changeDirection(direction: DIRECTION) {
     this.direction = direction
   }
 
-  public handlePosition(canvasHeight: number, canvasWidth: number) {
+  public handlePosition() {
     switch (this.direction) {
       case DIRECTION.TOP:
-        this.handleTopPosition(canvasHeight)
+        this.handleTopPosition()
         break;
       case DIRECTION.BOTTOM:
-        this.handleBottomPosition(canvasHeight)
+        this.handleBottomPosition()
         break
       case DIRECTION.LEFT:
-        this.handleLeftPosition(canvasWidth)
+        this.handleLeftPosition()
         break
       case DIRECTION.RIGHT:
-        this.handleRightPosition(canvasWidth)
+        this.handleRightPosition()
     }
   }
 
-  private handleTopPosition(canvasHeight: number) {
-    const nextPosition = this.y - this.speed
-    const hasReachedTopEnd = nextPosition < -this.squareWidth
-
-    this.y = hasReachedTopEnd ? canvasHeight : nextPosition
+  handleTopPosition() {
+    const nextHeadColumnIndex = this.headIndex.y - 1 >= 0
+      ? this.headIndex.y - 1
+      : this.snakeArr.length - 1
+    this.headIndex.y = nextHeadColumnIndex
   }
 
-  private handleBottomPosition(canvasHeight: number) {
-    const nextPosition = this.y + this.speed
-    const hasReachedBottomEnd = nextPosition > canvasHeight
-
-    this.y = hasReachedBottomEnd ? -this.squareWidth : nextPosition
+  handleBottomPosition() {
+    const nextHeadColumnIndex = (this.headIndex.y + 1) % this.rowCells
+    this.headIndex.y = nextHeadColumnIndex
   }
 
-  private handleLeftPosition(canvasWidth: number) {
-    const nextPosition = this.x - this.speed
-    const hasReachedLeftEnd = nextPosition < -this.squareWidth
-
-    this.x = hasReachedLeftEnd ? canvasWidth : nextPosition
+  handleLeftPosition() {
+    const nextHeadRowIndex = this.headIndex.x - 1 >= 0
+      ? this.headIndex.x - 1
+      : this.snakeArr[this.headIndex.y].length - 1
+    this.headIndex.x = nextHeadRowIndex
   }
 
-  private handleRightPosition(canvasWidth: number) {
-    const nextPosition = this.x + this.speed
-    const hasReachedRightEnd = nextPosition > canvasWidth
-
-    this.x = hasReachedRightEnd ? -this.squareWidth : nextPosition
+  handleRightPosition() {
+    const nextHeadRowIndex = (this.headIndex.x + 1) % this.rowCells
+    this.headIndex.x = nextHeadRowIndex
   }
 }
