@@ -3,8 +3,8 @@ import { DIRECTION } from "./types"
 import { Snake } from "./Snake"
 
 const horizontalPosition = 0
-const snakeSpeed = 10
-const squareWidth = 50
+const snakeSpeed = 20
+const squareWidth = 20
 
 const snake = new Snake(
   horizontalPosition,
@@ -42,7 +42,11 @@ function handleKeyDown({ key }: KeyboardEvent) {
       break;
     }
     case "Enter": {
-      snake.test()
+      snake.eat()
+      break
+    }
+    case "a": {
+      snake.addFood()
     }
   }
 }
